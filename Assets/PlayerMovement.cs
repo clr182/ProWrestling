@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
     public Rigidbody2D rb2D;
     Vector2 moveDir;
     public float runSpeed;
+    GameObject feetAnchor;
 
     private void Awake()
     {
@@ -15,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
         moveSpeed = 3;
         runSpeed = 0;
     }
-    // Start is called before the first frame update
+
     void Start()
     {
         
@@ -26,7 +27,7 @@ public class PlayerMovement : MonoBehaviour
         Move();
     }
 
-    // Update is called once per frame
+
     void Update()
     {
         ProcessInputs();
@@ -39,6 +40,7 @@ public class PlayerMovement : MonoBehaviour
 
         moveDir = new Vector2(moveX, moveY).normalized;
 
+        //running
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             runSpeed = 2;
@@ -53,8 +55,6 @@ public class PlayerMovement : MonoBehaviour
     void Move()
     {
         rb2D.velocity = new Vector2(moveDir.x * (moveSpeed + runSpeed), moveDir.y * (moveSpeed + runSpeed));
-
-        
     }
 
 }
