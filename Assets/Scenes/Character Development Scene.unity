@@ -172,7 +172,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 0
-  rb2D: {fileID: 0}
+  rb2D: {fileID: 9679787}
   runSpeed: 0
 --- !u!50 &9679787
 Rigidbody2D:
