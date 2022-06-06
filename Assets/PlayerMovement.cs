@@ -76,10 +76,6 @@ public class PlayerMovement : MonoBehaviour
         {
             checkIfOnTurnbuckle();
         }
-        else if (Input.GetKeyDown(KeyCode.E))
-        {
-            rb2D.AddRelativeForce(new Vector2(-2 * bounceForce, 0), ForceMode2D.Force);
-        }
     }
 
     void Move()
@@ -152,7 +148,6 @@ public class PlayerMovement : MonoBehaviour
         else if (collision.gameObject.CompareTag("RopeRight"))
         {
             repulseV = new Vector2((moveSpeed + runSpeed) * -1 * bounceForce, 0);
-            Debug.Log(repulseV);
             ropeBouncing = true;
         }
     }
