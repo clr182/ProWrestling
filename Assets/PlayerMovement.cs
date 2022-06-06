@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,17 +9,34 @@ public class PlayerMovement : MonoBehaviour
     public Rigidbody2D rb2D;
     Vector2 moveDir;
     public float runSpeed;
-    GameObject feetAnchor;
 
     Vector2 repulseV;
+    
+    Vector2 lastKnownPos;
+    Vector2 anchorPointPos;
+
+    bool isInActiveTurnbuckleRadius;
     bool running;
+    bool anchored;
+    bool ropeBouncing;
+    int SpaceBtncounter;
+    bool isOnTurnBuckle;
 
     private void Awake()
     {
         rb2D = GetComponent<Rigidbody2D>();
+    }
+
+    private void Start()
+    {
         moveSpeed = 3;
         runSpeed = 0;
         running = false;
+        anchored = false;
+        SpaceBtncounter = 0;
+        isInActiveTurnbuckleRadius = false;
+        isOnTurnBuckle = false;
+        
     }
 
     private void FixedUpdate()
@@ -26,6 +44,7 @@ public class PlayerMovement : MonoBehaviour
         Move();
     }
 
+ 
 
     void Update()
     {
@@ -34,6 +53,7 @@ public class PlayerMovement : MonoBehaviour
 
     void ProcessInputs()
     {
+        
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
 
@@ -43,69 +63,100 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             runSpeed = 2;
+            running = true;
         }
         else if (Input.GetKeyUp(KeyCode.LeftShift))
         {
             runSpeed = 0;
             running = false;
         }
-
+        else if (Input.GetKeyDown(KeyCode.Space))
+        {
+            checkIfOnTurnbuckle();
+        }
     }
 
     void Move()
     {
-        if (!running)
+        if (!anchored)
         {
             rb2D.velocity = new Vector2(moveDir.x * (moveSpeed + runSpeed), moveDir.y * (moveSpeed + runSpeed));
         }
-        else
+        else if(ropeBouncing)
         {
             rb2D.AddForce(repulseV);
         }
-        
+    }
+
+    private void checkIfOnTurnbuckle()
+    {
+        if (!isOnTurnBuckle)
+        {
+            if (isInActiveTurnbuckleRadius)
+            {
+                gameObject.layer = 7;
+                gameObject.transform.position = anchorPointPos;
+                isOnTurnBuckle = true;
+            }
+        }
+        else
+        {
+            gameObject.layer = 6;
+            gameObject.transform.position = lastKnownPos;
+            isOnTurnBuckle = false;
+        }
+
+        if(isOnTurnBuckle)
+        {
+            anchored = true;
+        }
+        else
+        {
+            anchored = false;
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        running = true;
-            switch (collision.gameObject.tag)
-            {
-                case "RopeTop":
-                    repulseV = new Vector2(0, (moveSpeed + runSpeed) * -1);
-                    break;
-                case "RopeBottom":
-                    repulseV = new Vector2(0, (moveSpeed + runSpeed) * 1);
-                    break;
-                case "RopeLeft":
-                    repulseV = new Vector2((moveSpeed + runSpeed) * 1, 0);
-                    break;
-                case "RopeRight":
-                    repulseV = new Vector2((moveSpeed + runSpeed) * -1, 0);
-                    break;
-                default:
-                    break;
-            }
-
-            //
-            //running = true;
-            //if(collision.gameObject.tag == "RopeTop")
-            //{
-            //    repulseV = new Vector2(0, (moveSpeed + runSpeed) * 1);
-            //}
-            //else if (collision.gameObject.tag == "RopeBottom")
-            //{
-            //    repulseV = new Vector2(0, (moveSpeed + runSpeed) * -1);
-            //}
-            //else if (collision.gameObject.tag == "RopeLeft")
-            //{
-            //    repulseV = new Vector2((moveSpeed + runSpeed) * 1, 0);
-            //}
-            //else if (collision.gameObject.tag == "RopeRight")
-            //{
-            //    repulseV = new Vector2((moveSpeed + runSpeed) * -1, 0);
-            //}
+        if(collision.gameObject.tag == "RopeTop" && running)
+        {
+            repulseV = new Vector2(0, (moveSpeed + runSpeed) * -1);
+        }
+        else if(collision.gameObject.tag == "RopeBottom" && running)
+        {
+            repulseV = new Vector2(0, (moveSpeed + runSpeed) * 1);
+        }
+        else if (collision.gameObject.tag == "RopeLeft" && running)
+        {
+            repulseV = new Vector2((moveSpeed + runSpeed) * 1, 0);
+        }
+        else if (collision.gameObject.tag == "RopeRight" && running)
+        {
+            repulseV = new Vector2((moveSpeed + runSpeed) * -1, 0);
+        }
     }
 
-    
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        
+        if(collision.gameObject.tag == "AnchorPoint")
+        {
+            isInActiveTurnbuckleRadius = true;
+            Vector2 childAnchorPos = collision.gameObject.GetComponentInChildren<CircleCollider2D>().transform.position;
+            lastKnownPos = childAnchorPos;
+            anchorPointPos = collision.gameObject.transform.position;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "AnchorPoint")
+        {
+            isInActiveTurnbuckleRadius = false;
+
+        }
+    }
+
+
 
 }
