@@ -9,6 +9,11 @@ public class PlayerMovement : MonoBehaviour
     public Rigidbody2D rb2D;
     Vector2 moveDir;
     public float runSpeed;
+    
+    // Bounce Vars
+    public float bounceForce = 100;
+    int bounceCount; // Used to calculate how many ticks to apply force
+    public int bounceCountMax = 10;
 
     Vector2 repulseV;
     
@@ -36,15 +41,13 @@ public class PlayerMovement : MonoBehaviour
         SpaceBtncounter = 0;
         isInActiveTurnbuckleRadius = false;
         isOnTurnBuckle = false;
-        
+        bounceCount = 0;
     }
 
     private void FixedUpdate()
     {
         Move();
     }
-
- 
 
     void Update()
     {
@@ -53,7 +56,6 @@ public class PlayerMovement : MonoBehaviour
 
     void ProcessInputs()
     {
-        
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
 
@@ -78,13 +80,20 @@ public class PlayerMovement : MonoBehaviour
 
     void Move()
     {
-        if (!anchored)
+        if (!anchored & !ropeBouncing)
         {
             rb2D.velocity = new Vector2(moveDir.x * (moveSpeed + runSpeed), moveDir.y * (moveSpeed + runSpeed));
         }
         else if(ropeBouncing)
         {
             rb2D.AddForce(repulseV);
+            bounceCount++;
+
+            if (bounceCount >= bounceCountMax)
+            {
+                ropeBouncing = false;
+                bounceCount = 0;
+            }
         }
     }
 
@@ -118,28 +127,34 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.gameObject.tag == "RopeTop" && running)
+       // if (!running)
+        //     return;
+
+        if(collision.gameObject.CompareTag("RopeTop"))
         {
-            repulseV = new Vector2(0, (moveSpeed + runSpeed) * -1);
+            repulseV = new Vector2(0, (moveSpeed + runSpeed) * -1 * bounceForce);
+            ropeBouncing = true;
         }
-        else if(collision.gameObject.tag == "RopeBottom" && running)
+        else if(collision.gameObject.CompareTag("RopeBottom"))
         {
-            repulseV = new Vector2(0, (moveSpeed + runSpeed) * 1);
+            repulseV = new Vector2(0, (moveSpeed + runSpeed) * 1 * bounceForce);
+            ropeBouncing = true;
         }
-        else if (collision.gameObject.tag == "RopeLeft" && running)
+        else if (collision.gameObject.CompareTag("RopeLeft"))
         {
-            repulseV = new Vector2((moveSpeed + runSpeed) * 1, 0);
+            repulseV = new Vector2((moveSpeed + runSpeed) * 1 * bounceForce, 0);
+            ropeBouncing = true;
         }
-        else if (collision.gameObject.tag == "RopeRight" && running)
+        else if (collision.gameObject.CompareTag("RopeRight"))
         {
-            repulseV = new Vector2((moveSpeed + runSpeed) * -1, 0);
+            repulseV = new Vector2((moveSpeed + runSpeed) * -1 * bounceForce, 0);
+            ropeBouncing = true;
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        
-        if(collision.gameObject.tag == "AnchorPoint")
+        if(collision.gameObject.CompareTag("AnchorPoint"))
         {
             isInActiveTurnbuckleRadius = true;
             Vector2 childAnchorPos = collision.gameObject.GetComponentInChildren<CircleCollider2D>().transform.position;
@@ -150,13 +165,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "AnchorPoint")
+        if (collision.gameObject.CompareTag("AnchorPoint"))
         {
             isInActiveTurnbuckleRadius = false;
-
         }
     }
-
-
-
+    
 }
