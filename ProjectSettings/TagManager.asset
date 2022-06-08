@@ -3,7 +3,15 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - RopesY
+  - RopesX
+  - RopeTop
+  - RopeLeft
+  - RopeRight
+  - RopeBottom
+  - AnchorPoint
+  - returnAnchor
   layers:
   - Default
   - TransparentFX
@@ -11,8 +19,8 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
+  - Arena
+  - TurnBuckles
   - 
   - 
   - 
@@ -40,4 +48,7 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: ARENA
+    uniqueID: 326804635
     locked: 0
