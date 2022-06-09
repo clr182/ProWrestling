@@ -2,8 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
     public float moveSpeed;
     public Rigidbody2D rb2D;
@@ -40,12 +41,18 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Move();
+        if (this.isLocalPlayer)
+        {
+            Move();
+        }
     }
 
     void Update()
     {
-        ProcessInputs();
+        if (this.isLocalPlayer)
+        {
+            ProcessInputs();
+        }
     }
 
     void ProcessInputs()
